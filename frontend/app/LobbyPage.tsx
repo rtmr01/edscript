@@ -52,6 +52,11 @@ export const LobbyPage: React.FC = () => {
         return home.includes(search) || away.includes(search);
     });
 
+    useEffect(() => {
+  // Isso vai deixar a aba como "Pro Stats | Futebol" ou "Pro Stats | Basquete"
+  document.title = `Pro Stats | ${sport?.toUpperCase()}`;
+}, [sport]);
+
     return (
         <div className="min-h-screen bg-[#0a101f] text-white p-4 md:p-8 relative">
             {/* Glow effect */}

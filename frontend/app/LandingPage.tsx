@@ -1,8 +1,9 @@
 // frontend/app/LandingPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Corrigido: Nomes oficiais dos ícones Lucide
 import { Search, Trophy, Dribbble, Gamepad2, Target } from 'lucide-react';
+
 
 const sports = [
     { id: 'futebol', label: 'Futebol', icon: Trophy, color: 'text-green-400', bgColor: 'bg-green-400', path: '/lobby/futebol' },
@@ -10,6 +11,7 @@ const sports = [
     { id: 'esports', label: 'Esports', icon: Gamepad2, color: 'text-purple-500', bgColor: 'bg-purple-500', path: '/lobby/esports' },
     { id: 'tenis', label: 'Tênis', icon: Target, color: 'text-yellow-400', bgColor: 'bg-yellow-400', path: '/lobby/tenis' },
 ];
+
 
 export const LandingPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
