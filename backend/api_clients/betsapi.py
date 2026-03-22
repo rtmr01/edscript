@@ -33,13 +33,18 @@ class BetsAPIClient:
         """
         return self._get("events/inplay", params={"sport_id": sport_id})
 
-    def get_upcoming_events(self, sport_id: int = 1, day: str = None) -> dict:
+    def get_upcoming_events(self, sport_id: int = 1, day: str = None, league_id: int = None) -> dict:
         """
-        Retorna eventos futuros.
+        Retorna eventos futuros. Permite filtrar por liga (ex: Brasileirão).
         """
         params = {"sport_id": sport_id}
+        
         if day:
             params["day"] = day
+            
+        if league_id:
+            params["league_id"] = league_id
+            
         return self._get("events/upcoming", params=params)
 
     def get_event_view(self, event_id: str) -> dict:

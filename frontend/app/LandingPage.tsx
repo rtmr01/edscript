@@ -14,11 +14,13 @@ export const LandingPage: React.FC = () => {
     const navigate = useNavigate();
 
     const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchTerm.trim()) {
-            navigate(`/lobby/futebol?search=${encodeURIComponent(searchTerm)}`);
-        }
-    };
+    e.preventDefault();
+    if (searchTerm.trim()) {
+        navigate(`/lobby/futebol?search=${encodeURIComponent(searchTerm.trim())}`);
+    } else {
+        navigate(`/lobby/futebol`);
+    }
+};
 
     return (
         <div className="min-h-screen bg-[#1C1F5A] text-white font-sans flex flex-col items-center justify-center p-4 overflow-hidden relative">

@@ -1,7 +1,7 @@
 import os
 import hashlib
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from api_clients.betsapi import BetsAPIClient
 from ml.predictor import predict_match
@@ -20,24 +20,48 @@ app.add_middleware(
 )
 
 @app.get("/api/upcoming-matches")
-def get_upcoming_matches():
+def get_upcoming_matches(
+    sport_id: int = 1, 
+    league_id: int = Query(None), 
+    search: str = Query(None)
+):
     try:
         client = BetsAPIClient()
-        upcoming = client.get_upcoming_events(sport_id=1) 
-        # sport_id=1 é Soccer na BetsAPI
+        # Buscamos os eventos. Se league_id for enviado, o cliente tratará o filtro na origem
+        upcoming = client.get_upcoming_events(sport_id=sport_id, league_id=league_id)
+        
         matches = []
-        for event in upcoming.get('results', [])[:15]: # Limitando aos primeiros 15 pra ficar mais rapido
-            home_name = event.get('home', {}).get('name')
-            away_name = event.get('away', {}).get('name')
-            if home_name and away_name:
-                matches.append({
-                    "id": event.get('id'),
-                    "homeTeam": home_name,
-                    "awayTeam": away_name,
-                    "time": event.get('time')
-                })
+        results = upcoming.get('results', [])
+        
+        for event in results:
+            league_name = event.get('league', {}).get('name', '')
+            home_name = event.get('home', {}).get('name', '')
+            away_name = event.get('away', {}).get('name', '')
+
+            # 1. BLOQUEIO DE ESOCCER E LIXO (Essencial para o sport_id 1)
+            blacklist = ["esoccer", "electronic", "mins play", "friendly", "cyber", "fifa", "simulated"]
+            if sport_id == 1 and any(term in league_name.lower() for term in blacklist):
+                continue
+
+            # 2. FILTRO DE BUSCA (Se houver termo de pesquisa)
+            if search:
+                s = search.lower()
+                if s not in home_name.lower() and s not in away_name.lower() and s not in league_name.lower():
+                    continue
+
+            matches.append({
+                "id": event.get('id'),
+                "homeTeam": home_name,
+                "awayTeam": away_name,
+                "time": event.get('time'),
+                "league": league_name
+            })
+            
+            if len(matches) >= 20: break
+                
         return {"matches": matches}
     except Exception as e:
+        print(f"Erro no Backend: {e}")
         return {"error": str(e), "matches": []}
 
 @app.get("/api/match-scenario")
