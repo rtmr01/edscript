@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Trophy, Dribbble, Gamepad2, Target } from 'lucide-react';
 
 const sports = [
-    { id: 'futebol', label: 'Futebol', icon: Trophy, color: 'text-green-400', bgColor: 'bg-green-400', path: '/analise/futebol' },
-    { id: 'basquete', label: 'Basquete', icon: Dribbble, color: 'text-orange-500', bgColor: 'bg-orange-500', path: '/analise/basquete' },
-    { id: 'esports', label: 'Esports', icon: Gamepad2, color: 'text-purple-500', bgColor: 'bg-purple-500', path: '/analise/esports' },
-    { id: 'tenis', label: 'Tênis', icon: Target, color: 'text-yellow-400', bgColor: 'bg-yellow-400', path: '/analise/tenis' },
+    { id: 'futebol', label: 'Futebol', icon: Trophy, color: 'text-green-400', bgColor: 'bg-green-400', path: '/lobby/futebol' },
+    { id: 'basquete', label: 'Basquete', icon: Dribbble, color: 'text-orange-500', bgColor: 'bg-orange-500', path: '/lobby/basquete' },
+    { id: 'esports', label: 'Esports', icon: Gamepad2, color: 'text-purple-500', bgColor: 'bg-purple-500', path: '/lobby/esports' },
+    { id: 'tenis', label: 'Tênis', icon: Target, color: 'text-yellow-400', bgColor: 'bg-yellow-400', path: '/lobby/tenis' },
 ];
 
 export const LandingPage: React.FC = () => {
@@ -16,11 +16,11 @@ export const LandingPage: React.FC = () => {
     const navigate = useNavigate();
 
     const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchTerm.trim()) {
-            navigate(`/analise/futebol?search=${encodeURIComponent(searchTerm)}`);
-        }
-    };
+    e.preventDefault();
+    if (searchTerm.trim()) {
+        navigate(`/lobby/futebol?search=${encodeURIComponent(searchTerm)}`);
+    }
+};
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-white font-sans flex flex-col items-center justify-center p-4 overflow-hidden relative">
