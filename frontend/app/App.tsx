@@ -43,7 +43,7 @@ export default function App() {
   useEffect(() => {
     const sportKey = (sport || 'futebol').toLowerCase();
     const sportId = SPORT_IDS[sportKey] || 1;
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/upcoming-matches?sport_id=${sportId}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/upcoming-matches?sport_id=${sportId}`)
       .then(res => res.json())
       .then(data => {
         const matches = Array.isArray(data.matches) ? data.matches : [];
@@ -81,7 +81,7 @@ export default function App() {
       params.set('matchId', selectedMatchId);
     }
 
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/match-scenario?${params.toString()}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/match-scenario?${params.toString()}`)
       .then(res => res.json())
       .then(data => setApiData(data))
       .catch(err => console.error("Erro ao puxar dados da API:", err));

@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from api_clients.betsapi import BetsAPIClient
 
-load_dotenv('/home/velame/Documents/hackathon/.env')
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(env_path)
 
 EPL_LEAGUE_ID = 94
 SPORT_ID = 1

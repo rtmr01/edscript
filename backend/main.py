@@ -9,8 +9,8 @@ from api_clients.betsapi import BetsAPIClient
 from ml.predictor import predict_match
 from ml.epl_analyzer import EPLAnalyzer
 
-# Carrega token da BetsAPI de .env (Caminho relativo automático para portabilidade)
-env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '.env')
+# Carrega token da BetsAPI de .env (Caminho relativo corrigido)
+env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
 load_dotenv(env_path)
 print(f"DEBUG: Carregando .env de {env_path}")
 
@@ -154,6 +154,57 @@ def _build_squads(match_id: str | None, home_team: str, away_team: str) -> dict[
             "away": _fallback_squad(away_team),
         }
 
+
+def _fetch_team_recent_results(team_name: str, league_id: int | None = None, count: int = 5) -> list[dict[str, str]]:
+    """
+    Busca os últimos resultados reais de um time usando o endpoint de eventos encerrados da BetsAPI.
+    """
+    try:
+        client = BetsAPIClient()
+        # Buscamos partidas encerradas da liga (ou geral se league_id for None)
+        res = client.get_ended_events(sport_id=1, league_id=league_id)
+        events = res.get('results', [])
+        
+        team_results = []
+        for ev in events:
+            home = ev.get('home', {}).get('name', '')
+            away = ev.get('away', {}).get('name', '')
+            ss = ev.get('ss') # score string "2-1"
+            
+            # Filtro por nome (case insensitive)
+            if team_name.lower() in home.lower() or team_name.lower() in away.lower():
+                if ss and '-' in ss:
+                    try:
+                        scores = ss.split('-')
+                        h_score = int(scores[0])
+                        a_score = int(scores[1])
+                        
+                        is_home = team_name.lower() in home.lower()
+                        if h_score == a_score:
+                            r = "D"
+                        elif (is_home and h_score > a_score) or (not is_home and a_score > h_score):
+                            r = "W"
+                        else:
+                            r = "L"
+                        
+                        team_results.append({
+                            "result": r, 
+                            "score": ss,
+                            "scored": h_score if is_home else a_score,
+                            "conceded": a_score if is_home else h_score
+                        })
+                    except (ValueError, IndexError):
+                        continue
+            
+            if len(team_results) >= count:
+                break
+        
+        return team_results
+    except Exception as e:
+        print(f"Erro ao buscar histórico para {team_name}: {e}")
+        return []
+
+
 @app.get("/api/upcoming-matches")
 def get_upcoming_matches(
     params: Annotated[UpcomingMatchesQuery, Depends()]
@@ -244,30 +295,81 @@ def get_match_scenario(params: Annotated[MatchScenarioQuery, Depends()]):
     epl_data = None
     is_epl = False
     
-    # Heurística simples: se um dos times está no nosso power dict da EPL
-    if epl_analyzer.get_p(homeTeam) > 0.1 or epl_analyzer.get_p(awayTeam) > 0.1:
-        is_epl = True
+    # 4. Dados Históricos Reais vs Sintéticos
+    league_id = None
+    event_view = None
+    
+    if matchId:
         try:
-            # Tenta pegar dados live se tiver id
-            live_stats = None
-            if matchId:
-                try:
-                    res_live = BetsAPIClient().get_event_view(matchId)
-                    res = res_live.get("results", [{}])[0]
-                    stats = res.get("stats", {})
-                    if stats:
-                        live_stats = {
-                            'home_possession': int(stats.get('possession_rt', [50])[0]),
-                            'home_shots': int(stats.get('shottotal', [0])[0]),
-                            'away_possession': 100 - int(stats.get('possession_rt', [50])[0])
-                        }
-                except: pass
-            
+            event_view = BetsAPIClient().get_event_view(matchId)
+            results = event_view.get("results", [{}])
+            if results:
+                league_id = results[0].get("league", {}).get("id")
+        except Exception:
+            pass
+
+    # Squads (Reaproveitando view se disponível)
+    if event_view:
+        squads = _extract_squads_from_event_view(event_view, homeTeam, awayTeam)
+    else:
+        squads = _build_squads(matchId, homeTeam, awayTeam)
+
+    # Histórico Local (Real se possível)
+    real_history_home = _fetch_team_recent_results(homeTeam, league_id)
+    real_history_away = _fetch_team_recent_results(awayTeam, league_id)
+
+    def get_trends_from_history(history):
+        if not history:
+            return get_trend(300), get_trend(400)
+        off = [m["scored"] for m in history]
+        deff = [m["conceded"] for m in history]
+        # Preenche com zeros se tiver menos de 5
+        while len(off) < 5: off.append(0)
+        while len(deff) < 5: deff.append(0)
+        return off[:5], deff[:5]
+
+    off_home, def_home = get_trends_from_history(real_history_home)
+    off_away, def_away = get_trends_from_history(real_history_away)
+
+    # Live stats para EPL Analysis
+    live_stats = None
+    if event_view:
+        try:
+            res = event_view.get("results", [{}])[0]
+            stats = res.get("stats", {})
+            if stats:
+                live_stats = {
+                    'home_possession': int(stats.get('possession_rt', [50])[0]),
+                    'home_shots': int(stats.get('shottotal', [0])[0]),
+                    'away_possession': 100 - int(stats.get('possession_rt', [50])[0])
+                }
+        except: pass
+
+    if is_epl:
+        try:
             epl_data = epl_analyzer.get_match_insights(homeTeam, awayTeam, live_stats)
         except Exception as e:
             print(f"Erro EPL Analysis: {e}")
 
-    squads = _build_squads(matchId, homeTeam, awayTeam)
+    matchHistory = {
+        "homeTeam": {
+            "name": homeTeam,
+            "recentForm": real_history_home if real_history_home else get_recent_form(200),
+            "offensiveTrend": off_home,
+            "defensiveTrend": def_home
+        },
+        "awayTeam": {
+            "name": awayTeam,
+            "recentForm": real_history_away if real_history_away else get_recent_form(500),
+            "offensiveTrend": off_away,
+            "defensiveTrend": def_away
+        },
+        "headToHead": {
+            "homeWins": _hash_rand(1, 5, pseudo_seed, 800),
+            "draws": _hash_rand(1, 4, pseudo_seed, 801),
+            "awayWins": _hash_rand(1, 5, pseudo_seed, 802)
+        }
+    }
 
     return {
         "homeTeam": homeTeam,
@@ -378,25 +480,7 @@ def get_match_scenario(params: Annotated[MatchScenarioQuery, Depends()]):
                 "type": "trend"
             }
         ],
-        "matchHistory": {
-            "homeTeam": {
-                "name": homeTeam,
-                "recentForm": get_recent_form(200),
-                "offensiveTrend": get_trend(300),
-                "defensiveTrend": get_trend(400)
-            },
-            "awayTeam": {
-                "name": awayTeam,
-                "recentForm": get_recent_form(500),
-                "offensiveTrend": get_trend(600),
-                "defensiveTrend": get_trend(700)
-            },
-            "headToHead": {
-                "homeWins": _hash_rand(1, 5, pseudo_seed, 800),
-                "draws": _hash_rand(1, 4, pseudo_seed, 801),
-                "awayWins": _hash_rand(1, 5, pseudo_seed, 802)
-            }
-        },
+        "matchHistory": matchHistory,
         "squads": squads
     }
 

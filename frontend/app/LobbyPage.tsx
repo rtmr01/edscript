@@ -82,7 +82,7 @@ export const LobbyPage: React.FC = () => {
                 params.append('search', debouncedSearch);
             }
 
-            const url = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/upcoming-matches?${params.toString()}`;
+            const url = `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/upcoming-matches?${params.toString()}`;
 
             try {
                 const res = await fetch(url);

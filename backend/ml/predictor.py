@@ -67,11 +67,21 @@ def predict_match(home_team, away_team):
     home_penalty_prob = clf_hp.predict_proba(X_penalty)[0][1]
     away_penalty_prob = clf_ap.predict_proba(X_penalty)[0][1]
     
+    # Soften probabilities: Capping between 5% and 90% and re-normalizing
+    win_probs_list = [win_probs.get('H', 33.3), win_probs.get('D', 33.3), win_probs.get('A', 33.3)]
+    soft_probs = [min(90, max(5, p)) for p in win_probs_list]
+    total = sum(soft_probs)
+    soft_probs = [int((p / total) * 100) for p in soft_probs]
+    
+    # Ajuste fino para garantir que a soma seja exatamente 100
+    diff = 100 - sum(soft_probs)
+    soft_probs[0] += diff
+    
     return {
         "winner": {
-            "home": min(95, max(5, int(win_probs.get('H', 33)))),
-            "draw": min(95, max(5, int(win_probs.get('D', 33)))),
-            "away": min(95, max(5, int(win_probs.get('A', 33))))
+            "home": soft_probs[0],
+            "draw": soft_probs[1],
+            "away": soft_probs[2]
         },
         "goals": {
             "home_expected": max(0.0, round(home_goals_pred, 1)),

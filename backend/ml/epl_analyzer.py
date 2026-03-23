@@ -18,6 +18,13 @@ class EPLAnalyzer:
             if team in k or k in team: return v
         return 0.1
 
+    def _soften_probabilities(self, probs):
+        # Garante que nenhuma probabilidade seja exatamente 0 ou 100
+        # Capping entre 2% e 94%
+        probs = np.clip(probs, 0.02, 0.94)
+        # Re-normaliza para somar 1.0
+        return probs / probs.sum()
+
     def predict_winner(self, home_team, away_team):
         hp = self.get_p(home_team)
         ap = self.get_p(away_team)
@@ -25,6 +32,7 @@ class EPLAnalyzer:
         
         X = pd.DataFrame([[hp, ap, diff]], columns=['home_power', 'away_power', 'power_diff'])
         probs = self.model.predict_proba(X)[0]
+        probs = self._soften_probabilities(probs)
         
         # Mapear classes do label encoder
         # self.le.classes_ costuma ser ['A', 'D', 'H']
