@@ -276,8 +276,17 @@ def get_match_scenario(params: Annotated[MatchScenarioQuery, Depends()]):
     home_penalty_base = ml_preds["penalty"]["home"]
     away_penalty_base = ml_preds["penalty"]["away"]
     
-    # Determina a confiança baseada na probabilidade do favorito (real)
+    # Confiança padrão e desfecho (serão atualizados pelo modelo se EPL)
     main_confidence = int(max(home_win_prob, away_win_prob, draw_prob))
+    main_outcome_text = f"vitória do {homeTeam}"
+    main_outcome_pct = home_win_prob
+    if draw_prob > home_win_prob and draw_prob > away_win_prob:
+        main_outcome_text = "um empate"
+        main_outcome_pct = draw_prob
+    elif away_win_prob > home_win_prob and away_win_prob > draw_prob:
+        main_outcome_text = f"vitória do {awayTeam}"
+        main_outcome_pct = away_win_prob
+
     if main_confidence < 40: main_confidence = 40
     if main_confidence > 98: main_confidence = 98
 
@@ -347,6 +356,28 @@ def get_match_scenario(params: Annotated[MatchScenarioQuery, Depends()]):
     if is_epl:
         try:
             epl_data = epl_analyzer.get_match_insights(homeTeam, awayTeam, live_stats)
+            if epl_data and "probabilities" in epl_data:
+                # PRIORIZAÇÃO: Sobrescreve probabilidades do modelo genérico pelas do modelo Premium EPL
+                probs = epl_data["probabilities"]
+                home_win_prob = probs.get('H', home_win_prob)
+                draw_prob = probs.get('D', draw_prob)
+                away_win_prob = probs.get('A', away_win_prob)
+                
+                # Recalcula confiança baseada no modelo premium
+                main_confidence = int(max(home_win_prob, draw_prob, away_win_prob))
+                if main_confidence < 40: main_confidence = 40
+                if main_confidence > 98: main_confidence = 98
+
+                # Define qual é o desfecho principal para o texto do insight
+                if home_win_prob >= draw_prob and home_win_prob >= away_win_prob:
+                    main_outcome_text = f"vitória do {homeTeam}"
+                    main_outcome_pct = home_win_prob
+                elif draw_prob >= home_win_prob and draw_prob >= away_win_prob:
+                    main_outcome_text = "um empate"
+                    main_outcome_pct = draw_prob
+                else:
+                    main_outcome_text = f"vitória do {awayTeam}"
+                    main_outcome_pct = away_win_prob
         except Exception as e:
             print(f"Erro EPL Analysis: {e}")
 
@@ -379,9 +410,9 @@ def get_match_scenario(params: Annotated[MatchScenarioQuery, Depends()]):
         "scenarioData": {
             "standard": {
                 "mainScenario": {
-                    "insight": f"{homeTeam} tem {home_win_prob}% de chance de vitória predita pelo modelo Random Forest.",
+                    "insight": f"Análise Premium: {main_outcome_pct}% para {main_outcome_text}" if is_epl else f"{home_win_prob}% de chance de vitória predita pelo modelo Random Forest.",
                     "confidence": main_confidence,
-                    "reasoning": f"O modelo AI analisou as estatísticas históricas dos times (ou seu 'power' estimado) projetando uma probabilidade de {home_goals_exp} xG para o {homeTeam}."
+                    "reasoning": f"O modelo especializado da Premier League aponta {main_outcome_text} como o cenário mais provável ({main_outcome_pct}%)." if is_epl else f"O modelo AI analisou as estatísticas históricas dos times projetando uma probabilidade de {home_goals_exp} xG para o {homeTeam}."
                 },
                 "probabilities": {
                     "goals": {"home": home_goals_prob, "away": away_goals_prob, "method": "ml"},

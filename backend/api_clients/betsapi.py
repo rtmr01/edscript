@@ -23,9 +23,15 @@ class BetsAPIClient:
         params['token'] = self.token
         url = f"{self.BASE_URL}/{endpoint}"
         
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        return response.json()
+        try:
+            # verify=False adicionado para contornar problemas de certificado SSL em alguns ambientes
+            # Um aviso de InsecureRequestWarning pode aparecer no console.
+            response = requests.get(url, params=params, verify=False)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Erro de conexão com BetsAPI ({endpoint}): {e}")
+            return {"results": [], "error": str(e)}
 
     def get_inplay_events(self, sport_id: int = 1, league_id: int = None) -> dict:
         """
