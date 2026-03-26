@@ -1,0 +1,38 @@
+{
+  "pressure": {
+    "goals": 1.3372,
+    "shots": 1.2214,
+    "cards": 0.9094,
+    "penalty": 1.2825
+  },
+  "control": {
+    "goals": 0.9802,
+    "shots": 0.98,
+    "cards": 1.0437,
+    "penalty": 0.931
+  },
+  "metadata": {
+    "source": "players_data-2025_2026.csv (EPL)",
+    "n_teams_total": 20,
+    "pressure_teams": [
+      "Manchester City",
+      "Arsenal",
+      "Manchester Utd",
+      "Chelsea",
+      "Liverpool"
+    ],
+    "control_teams": [
+      "Brentford",
+      "Tottenham Hotspur",
+      "Bournemouth",
+      "Newcastle United",
+      "Aston Villa",
+      "Everton",
+      "Brighton",
+      "West Ham United",
+      "Fulham",
+      "Leeds United"
+    ],
+    "league_avg_goals_p90": 0.1195
+  }
+}

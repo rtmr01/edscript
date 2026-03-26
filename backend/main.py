@@ -1,5 +1,6 @@
 import os
 import hashlib
+import json
 from typing import Annotated, Any
 from dotenv import load_dotenv
 from fastapi import FastAPI, Depends
@@ -20,6 +21,17 @@ print(f"DEBUG: Carregando .env de {env_path}")
 
 app = FastAPI(title="Match Assistant API")
 epl_analyzer = EPLAnalyzer()
+
+# Carrega multiplicadores de cenário derivados de dados reais da EPL 25/26
+_scenario_mult_path = os.path.join(current_dir, 'ml', 'scenario_multipliers.json')
+_scenario_mult = {"pressure": {"goals": 1.34, "shots": 1.22, "cards": 0.91, "penalty": 1.28}, "control": {"goals": 0.98, "shots": 0.98, "cards": 1.04, "penalty": 0.93}}
+if os.path.exists(_scenario_mult_path):
+    with open(_scenario_mult_path) as _f:
+        _loaded = json.load(_f)
+        _scenario_mult = {"pressure": _loaded["pressure"], "control": _loaded["control"]}
+    print(f"Multiplicadores de cenário carregados: {_scenario_mult}")
+else:
+    print("AVISO: scenario_multipliers.json não encontrado, usando fallback. Rode compute_scenario_multipliers.py")
 
 app.add_middleware(
     CORSMiddleware,
@@ -423,28 +435,28 @@ def get_match_scenario(params: Annotated[MatchScenarioQuery, Depends()]):
             },
             "pressure": {
                 "mainScenario": {
-                    "insight": f"Num cenário de pressão contínua, {homeTeam} sufocará o adversário, elevando finalizações estipuladas.",
+                    "insight": f"Cenário de pressão alta: {homeTeam} eleva o volume ofensivo, baseado no padrão dos top 5 times da EPL ({_scenario_mult['pressure']['goals']:.2f}x gols, {_scenario_mult['pressure']['shots']:.2f}x finalizações).",
                     "confidence": max(30, main_confidence - 10),
-                    "reasoning": f"Simulando desvantagem: O modelo altera as probabilidades, gerando aumento de volume ofensivo."
+                    "reasoning": f"Multiplicadores derivados dos dados reais da temporada 25/26: os times mais dominantes da Premier League produzem {_scenario_mult['pressure']['goals']:.2f}x mais gols e {_scenario_mult['pressure']['shots']:.2f}x mais finalizações que a média da liga."
                 },
                 "probabilities": {
-                    "goals": {"home": min(95, home_goals_prob + 15), "away": max(5, away_goals_prob - 10), "method": "ml"},
-                    "cards": {"home": min(85, home_cards_prob + 20), "away": away_cards_prob, "method": "ml"},
-                    "penalty": {"home": min(95, home_penalty_base + 12), "away": min(95, away_penalty_base + 8), "method": "ml"},
-                    "winner": {"home": min(80, home_win_prob + 12), "away": away_win_prob, "draw": max(5, draw_prob - 5), "method": "ml"}
+                    "goals": {"home": min(95, int(home_goals_prob * _scenario_mult['pressure']['goals'])), "away": max(5, int(away_goals_prob * _scenario_mult['pressure']['goals'] * 0.80)), "method": "ml"},
+                    "cards": {"home": min(90, int(home_cards_prob * _scenario_mult['pressure']['cards'])), "away": min(90, int(away_cards_prob * (_scenario_mult['pressure']['cards'] + 0.15))), "method": "ml"},
+                    "penalty": {"home": min(95, int(home_penalty_base * _scenario_mult['pressure']['penalty'])), "away": min(95, int(away_penalty_base * _scenario_mult['pressure']['penalty'])), "method": "ml"},
+                    "winner": {"home": min(85, int(home_win_prob * 1.12)), "away": max(5, int(away_win_prob * 0.92)), "draw": max(5, int(draw_prob * 0.95)), "method": "ml"}
                 }
             },
             "control": {
                 "mainScenario": {
-                    "insight": f"Domínio da posse (65%+): O modelo determina que {homeTeam} ditará o ritmo.",
+                    "insight": f"Cenário de controle tático: jogo equilibrado com menor exposição, baseado no padrão dos times medianos da EPL ({_scenario_mult['control']['goals']:.2f}x gols, {_scenario_mult['control']['cards']:.2f}x cartões).",
                     "confidence": min(99, main_confidence + 5),
-                    "reasoning": "Controle do meio-campo reduz transições perigosas e estabiliza a projeção de Regressão em Árvore."
+                    "reasoning": f"Multiplicadores derivados dos dados reais: em jogos entre times medianos (posições 6-15) da Premier League, o volume ofensivo cai para {_scenario_mult['control']['goals']:.2f}x da média, com {_scenario_mult['control']['cards']:.2f}x de cartões (jogo mais tenso e disputado)."
                 },
                 "probabilities": {
-                    "goals": {"home": max(20, home_goals_prob - 10), "away": max(10, away_goals_prob - 15), "method": "ml"},
-                    "cards": {"home": max(15, home_cards_prob - 15), "away": min(85, away_cards_prob + 10), "method": "ml"},
-                    "penalty": {"home": max(5, home_penalty_base - 8), "away": max(5, away_penalty_base - 10), "method": "ml"},
-                    "winner": {"home": min(90, home_win_prob + 8), "away": max(5, away_win_prob - 5), "draw": draw_prob, "method": "ml"}
+                    "goals": {"home": max(10, int(home_goals_prob * _scenario_mult['control']['goals'])), "away": max(8, int(away_goals_prob * _scenario_mult['control']['goals'])), "method": "ml"},
+                    "cards": {"home": max(10, int(home_cards_prob * _scenario_mult['control']['cards'])), "away": max(10, int(away_cards_prob * _scenario_mult['control']['cards'])), "method": "ml"},
+                    "penalty": {"home": max(5, int(home_penalty_base * _scenario_mult['control']['penalty'])), "away": max(5, int(away_penalty_base * _scenario_mult['control']['penalty'])), "method": "ml"},
+                    "winner": {"home": min(90, int(home_win_prob * 1.06)), "away": max(5, int(away_win_prob * 0.96)), "draw": min(60, int(draw_prob * 1.08)), "method": "ml"}
                 }
             }
         },

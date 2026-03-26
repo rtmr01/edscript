@@ -49,6 +49,16 @@ seguintes arquivos localmente:
   - model_player_cards.pkl
 
 ------------------------------------------------------------
+PASSO 3.5 — Gerar multiplicadores de cenário (Pressão / Controle)
+------------------------------------------------------------
+Na pasta: /backend/ml
+
+  python compute_scenario_multipliers.py
+
+Gera o arquivo scenario_multipliers.json com valores derivados
+dos dados reais da EPL 25/26 para os cenários alternativos.
+
+------------------------------------------------------------
 PASSO 4 — Iniciar o backend
 ------------------------------------------------------------
 Na pasta: /backend
