@@ -36,18 +36,18 @@ export function ProbabilityBar({
     const badges = {
       statistical: {
         icon: BarChart3,
-        label: 'Base histórica',
-        color: 'bg-[#1C1F5A]/10 text-[#1C1F5A] border-[#1C1F5A]/20'
+        label: 'Análise Quant.',
+        color: 'bg-white/5 text-white/50 border-white/10'
       },
       ml: {
         icon: Brain,
-        label: 'Leitura avançada',
-        color: 'bg-[#00D26A]/10 text-[#0f8a4a] border-[#00D26A]/30'
+        label: 'A.I. Engine',
+        color: 'bg-[#00D26A]/10 text-[#00D26A] border-[#00D26A]/30'
       },
       heuristic: {
         icon: Settings,
-        label: 'Ajuste de contexto',
-        color: 'bg-slate-100 text-slate-700 border-slate-200'
+        label: 'Heurística Ativa',
+        color: 'bg-blue-500/10 text-blue-400 border-blue-500/20'
       }
     };
     return badges[type];
@@ -57,11 +57,12 @@ export function ProbabilityBar({
   const MethodIcon = methodBadge.icon;
 
   const getColorClasses = (type: typeof color, isHome: boolean) => {
+    // Para dark mode tático, queremos cores mais controladas. Vitória verde, Cartões amarelo forte...
     const colorMap = {
-      goal: isHome ? 'bg-gradient-to-r from-[#1C1F5A] to-indigo-600' : 'bg-gradient-to-r from-[#32409a] to-[#1C1F5A]',
-      card: 'bg-gradient-to-r from-[#f59e0b] to-[#d97706]',
-      penalty: 'bg-gradient-to-r from-[#ef4444] to-[#be123c]',
-      winner: isHome ? 'bg-gradient-to-r from-[#00D26A] to-emerald-500' : 'bg-gradient-to-r from-[#1C1F5A] to-[#3140a3]'
+      goal: isHome ? 'bg-gradient-to-r from-blue-600 to-cyan-400' : 'bg-gradient-to-r from-blue-900 to-blue-600',
+      card: 'bg-gradient-to-r from-amber-500 to-orange-400',
+      penalty: 'bg-gradient-to-r from-red-600 to-rose-500',
+      winner: isHome ? 'bg-gradient-to-r from-[#00D26A] to-emerald-400' : 'bg-gradient-to-r from-[#0b0d30] to-[#121547]'
     };
     return colorMap[type];
   };
@@ -74,68 +75,70 @@ export function ProbabilityBar({
   return (
     <div className="relative group">
       <div
-        className="bg-white rounded-xl border border-[#1C1F5A]/15 p-4 transition-all duration-200 hover:shadow-md hover:border-[#1C1F5A]/30 cursor-pointer"
+        className="bg-[#141745]/60 backdrop-blur-md rounded-2xl border border-white/5 p-5 transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,210,106,0.1)] hover:border-[#00D26A]/30 cursor-pointer"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-lg bg-[#1C1F5A]/10">
-            <Icon className="w-5 h-5 text-[#1C1F5A]" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-[#1C1F5A]">{label}</h3>
-              <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs ${methodBadge.color}`}>
-                <MethodIcon className="w-3 h-3" />
-                <span>{methodBadge.label}</span>
-              </div>
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-black/20 border border-white/5">
+              <Icon className="w-4 h-4 text-[#00D26A]" />
             </div>
-            <p className="text-xs text-[#1C1F5A]/65">{source}</p>
+            <div>
+              <h3 className="text-white text-sm font-black uppercase tracking-widest">{label}</h3>
+              <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#00D26A]/60 mt-0.5">{source}</p>
+            </div>
+          </div>
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[9px] uppercase tracking-wider font-bold ${methodBadge.color}`}>
+             <MethodIcon className="w-3 h-3" />
+             <span>{methodBadge.label}</span>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[#1C1F5A]/75">{homeTeam}</span>
-            <span className="text-[#1C1F5A]">{homeProbability}%</span>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold px-1 uppercase tracking-widest">
+            <span className="text-white shrink-0 truncate max-w-[40%] text-left">{homeTeam}</span>
+            <span className="text-[#00D26A]">{homeProbability}%</span>
+            {drawProbability && drawProbability > 0 && (
+               <span className="text-white/30 hidden sm:inline-block">EMP {drawProbability}%</span>
+            )}
+            <span className="text-white shrink-0 truncate max-w-[40%] text-right">{awayTeam}</span>
           </div>
 
-          <div className="h-3 bg-[#1C1F5A]/10 rounded-full overflow-hidden flex">
+          <div className="h-3 bg-black/30 rounded-full overflow-hidden flex ring-1 ring-white/5">
             <div
-              className={`${getColorClasses(color, true)} transition-all duration-500 ease-out`}
+              className={`${getColorClasses(color, true)} transition-all duration-1000 ease-out`}
               style={{ width: `${homeWidth}%` }}
             />
             {drawProbability && drawProbability > 0 && (
               <div
-                className="bg-gradient-to-r from-slate-300 to-slate-400 transition-all duration-500 ease-out"
+                className="bg-white/10 transition-all duration-1000 ease-out"
                 style={{ width: `${drawWidth}%` }}
               />
             )}
             <div
-              className={`${getColorClasses(color, false)} transition-all duration-500 ease-out`}
+              className={`${getColorClasses(color, false)} transition-all duration-1000 ease-out relative`}
               style={{ width: `${awayWidth}%` }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[#1C1F5A]/75">{awayTeam}</span>
-            <span className="text-[#1C1F5A]">{awayProbability}%</span>
-          </div>
-
-          {drawProbability && drawProbability > 0 && (
-            <div className="flex items-center justify-center text-xs text-[#1C1F5A]/65 pt-1 border-t border-[#1C1F5A]/10">
-              Empate: {drawProbability}%
+            >
+               <div className="absolute inset-0 bg-white/20" />
             </div>
-          )}
+          </div>
+          
+          <div className="flex items-center justify-between text-xs font-bold px-1 uppercase tracking-widest">
+            <span className="text-white/50">{homeProbability}%</span>
+            <span className="text-white/50">{awayProbability}%</span>
+          </div>
         </div>
       </div>
 
       {showTooltip && (
-        <div className="absolute z-50 left-0 right-0 -bottom-2 translate-y-full">
-          <div className="bg-[#1C1F5A] text-white text-sm rounded-lg p-3 shadow-xl max-w-sm mx-auto">
-            <div className="flex items-start gap-2">
-              <div className="w-1 h-1 rounded-full bg-[#00D26A] mt-1.5 flex-shrink-0" />
-              <p className="leading-relaxed">{reasoning}</p>
+        <div className="absolute z-50 left-0 right-0 -bottom-3 translate-y-full px-4">
+          <div className="bg-[#0b0d30]/95 backdrop-blur-xl border border-[#00D26A]/30 text-white text-xs rounded-xl p-4 shadow-[0_10px_30px_rgba(0,0,0,0.8)] max-w-sm mx-auto">
+            <div className="flex items-start gap-3">
+              <div className="p-1.5 rounded bg-[#00D26A]/20 shrink-0 mt-0.5">
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#00D26A] animate-pulse" />
+              </div>
+              <p className="leading-relaxed font-medium text-white/80">{reasoning}</p>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ import { MatchHistory } from './components/MatchHistory';
 import { ScenarioSelector, ScenarioType } from './components/ScenarioSelector';
 import { SquadDetails } from './components/SquadDetails';
 import { PlayerStats } from './components/PlayerStats';
-import { Goal, AlertTriangle, Flag, Trophy, Timer, Swords, Zap } from 'lucide-react';
+import { Goal, AlertTriangle, Flag, Trophy, Timer, Swords, Zap, Activity, Layers, Users } from 'lucide-react';
 
 const SPORT_IDS: Record<string, number> = {
   futebol: 1,
@@ -74,6 +74,7 @@ export default function App() {
   const routeState = location.state as { match?: MatchItem } | null;
 
   const [activeScenario, setActiveScenario] = useState<ScenarioType>('standard');
+  const [activeTab, setActiveTab] = useState<'overview' | 'h2h' | 'squads'>('overview');
   const [apiData, setApiData] = useState<any>(null);
 
   const [upcomingMatches, setUpcomingMatches] = useState<MatchItem[]>([]);
@@ -166,26 +167,59 @@ export default function App() {
   const metricsForSport = SPORT_METRICS[normalizedSport] || SPORT_METRICS.futebol;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f3f6ff] via-[#e9eefc] to-[#eff9f4] p-4 md:p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-4 mb-8">
-          <h1 className="text-[#1C1F5A] text-3xl font-bold">Assistente de Partida (Com Apostas Ao Vivo)</h1>
+    <div className="min-h-screen bg-[#1C1F5A] text-white font-sans relative overflow-x-hidden selection:bg-[#00D26A]/30 selection:text-white pb-24">
+      
+      {/* TACTICAL PITCH BACKGROUND - Otimizado para não poluir */}
+      <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.05] mix-blend-screen scale-150 sm:scale-100 origin-bottom sm:origin-center transition-transform duration-1000">
+          <svg className="w-full max-w-[1200px] h-auto text-white" viewBox="0 0 800 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="50" y="50" width="700" height="1100" rx="4" stroke="currentColor" strokeWidth="3" />
+              <line x1="50" y1="600" x2="750" y2="600" stroke="currentColor" strokeWidth="3" />
+              <circle cx="400" cy="600" r="90" stroke="currentColor" strokeWidth="3" />
+              <circle cx="400" cy="600" r="5" fill="currentColor" />
+              <rect x="225" y="50" width="350" height="165" stroke="currentColor" strokeWidth="3" />
+              <rect x="300" y="50" width="200" height="55" stroke="currentColor" strokeWidth="3" />
+              <path d="M 330 215 A 90 90 0 0 0 470 215" stroke="currentColor" strokeWidth="3" />
+              <circle cx="400" cy="160" r="4" fill="currentColor" />
+              <rect x="225" y="985" width="350" height="165" stroke="currentColor" strokeWidth="3" />
+              <rect x="300" y="1095" width="200" height="55" stroke="currentColor" strokeWidth="3" />
+              <path d="M 330 985 A 90 90 0 0 1 470 985" stroke="currentColor" strokeWidth="3" />
+              <circle cx="400" cy="1040" r="4" fill="currentColor" />
+          </svg>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1C1F5A]/20 via-[#1C1F5A]/90 to-[#1C1F5A]" />
+      </div>
 
-          {apiData && (
-            <p className="text-sm text-[#1C1F5A]/70 mt-2">Partidas vindas da BetsAPI • Insights Preditivos</p>
-          )}
+      <div className="relative z-10 max-w-5xl mx-auto px-4 pt-8 md:px-8 space-y-10">
+        
+        {/* COCKPIT HEADER - Clean Layout */}
+        <div className="flex flex-col items-center justify-center gap-6 mb-12 border-b border-white/5 pb-10">
+          <div className="text-center w-full max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 mb-6">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00D26A] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00D26A]"></span>
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Engine Preditiva</span>
+            </div>
+
+            <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
+              {apiData ? apiData.homeTeam : 'Assistente'} <span className="text-white/30 px-2 lg:px-4">x</span> {apiData ? apiData.awayTeam : 'Preditivo'}
+            </h1>
+
+            {apiData && (
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00D26A] mt-6 bg-[#00D26A]/10 inline-block px-3 py-1 rounded-full border border-[#00D26A]/20">Tracker de Partida Ao Vivo • BetsAPI Integradora</p>
+            )}
+          </div>
 
           {accuracyCards.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-3xl mx-auto pt-2">
+            <div className="flex flex-wrap justify-center gap-3 w-full mt-6">
               {accuracyCards.map(card => (
                 <div
                   key={card.key}
-                  className="rounded-xl border border-[#1C1F5A]/15 bg-white/80 backdrop-blur-sm px-3 py-2 text-left shadow-sm"
+                  className="rounded-xl border border-white/5 bg-[#141745]/60 backdrop-blur-xl px-5 py-3 text-center transition-colors"
                 >
-                  <p className="text-[10px] uppercase tracking-wider text-[#1C1F5A]/70 font-semibold">{card.label}</p>
-                  <p className="text-lg font-black text-[#1C1F5A]">
-                    <span className="text-[#00D26A]">{card.value}</span>%
+                  <p className="text-[9px] uppercase tracking-[0.1em] text-white/60 font-medium mb-1">{card.label}</p>
+                  <p className="text-lg font-black text-white">
+                    <span className="text-[#00D26A]">{card.value}</span><span className="text-[10px] opacity-40 ml-0.5">%</span>
                   </p>
                 </div>
               ))}
@@ -194,144 +228,169 @@ export default function App() {
         </div>
 
         {!apiData ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <div className="w-8 h-8 border-4 border-[#1C1F5A] border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-[#1C1F5A]/70 animate-pulse">{apiError || 'Analisando dados da partida e calculando probabilidades...'}</p>
+          <div className="flex flex-col items-center justify-center py-32 space-y-6">
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-t-2 border-r-2 border-[#00D26A] animate-spin"></div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00D26A]/70 animate-pulse">{apiError || 'Processando varredura tática...'}</p>
           </div>
         ) : (
-          <>
-            {/* Main Scenario Card */}
-            <MatchScenarioCard
-              mainInsight={apiData.scenarioData[activeScenario].mainScenario.insight}
-              confidence={apiData.scenarioData[activeScenario].mainScenario.confidence}
-              reasoning={apiData.scenarioData[activeScenario].mainScenario.reasoning}
-            />
+          <div className="w-full">
+            
+            {/* TABS NAVIGATION */}
+            <div className="flex justify-center mb-10 w-full overflow-x-auto pb-2">
+               <div className="bg-[#0b0d30]/60 backdrop-blur-lg p-1.5 rounded-[1.5rem] inline-flex gap-1.5 border border-white/5 shadow-2xl">
+                 <button 
+                  onClick={() => setActiveTab('overview')}
+                  className={`flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all duration-300 ${activeTab === 'overview' ? 'bg-[#141745] text-[#00D26A] shadow-md border border-white/5' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                 >
+                   <Activity className="w-4 h-4" />
+                   <span className="text-xs font-black uppercase tracking-widest">Painel Preditivo</span>
+                 </button>
+                 <button 
+                  onClick={() => setActiveTab('h2h')}
+                  className={`flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all duration-300 ${activeTab === 'h2h' ? 'bg-[#141745] text-[#00D26A] shadow-md border border-white/5' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                 >
+                   <Layers className="w-4 h-4" />
+                   <span className="text-xs font-black uppercase tracking-widest">Contexto & H2H</span>
+                 </button>
+                 <button 
+                  onClick={() => setActiveTab('squads')}
+                  className={`flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all duration-300 ${activeTab === 'squads' ? 'bg-[#141745] text-[#00D26A] shadow-md border border-white/5' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                 >
+                   <Users className="w-4 h-4" />
+                   <span className="text-xs font-black uppercase tracking-widest">Elencos & Tracking</span>
+                 </button>
+               </div>
+            </div>
 
-            {/* EPL Premium Insight */}
-            {apiData.isEPL && apiData.eplAnalysis && (
-              <div className="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 backdrop-blur-md border border-emerald-500/30 rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-emerald-500 p-2 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-                    <Trophy className="text-emerald-950 w-5 h-5" />
+            {/* TAB CONTENT: OVERVIEW (Painel Central) */}
+            {activeTab === 'overview' && (
+              <div className="space-y-10 animate-in slide-in-from-bottom-4 fade-in duration-500">
+                
+                <ScenarioSelector
+                  activeScenario={activeScenario}
+                  onScenarioChange={setActiveScenario}
+                />
+
+                <MatchScenarioCard
+                  mainInsight={apiData.scenarioData[activeScenario].mainScenario.insight}
+                  confidence={apiData.scenarioData[activeScenario].mainScenario.confidence}
+                  reasoning={apiData.scenarioData[activeScenario].mainScenario.reasoning}
+                />
+
+                {apiData.isEPL && apiData.eplAnalysis && (
+                  <div className="bg-[#141745]/60 backdrop-blur-xl border border-white/5 rounded-[2rem] p-8 mt-6">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="bg-[#00D26A]/10 p-3 rounded-xl border border-[#00D26A]/20">
+                        <Trophy className="text-[#00D26A] w-6 h-6" />
+                      </div>
+                      <div>
+                        <h2 className="text-white font-black uppercase tracking-widest text-sm">Modelo Premium EPL</h2>
+                        <p className="text-[#00D26A]/70 text-[10px] uppercase font-bold tracking-widest mt-1.5">Dataset de Elite Calibrado</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {apiData.eplAnalysis.insights.map((insight: string, idx: number) => (
+                        <div key={idx} className="flex gap-4 items-start bg-[#0b0d30]/60 p-4 rounded-xl border border-white/5">
+                          <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#00D26A] shrink-0" />
+                          <p className="text-white/80 text-xs leading-relaxed font-medium">{insight}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 grid grid-cols-3 gap-4">
+                      {Object.entries(apiData.eplAnalysis.probabilities).map(([key, val]: any) => (
+                        <div key={key} className="bg-black/20 p-4 rounded-xl border border-white/5 text-center transition-colors hover:bg-white/5">
+                          <p className="text-[10px] text-white/50 font-black uppercase tracking-[0.2em]">{key === 'H' ? 'Casa' : key === 'A' ? 'Fora' : 'Empate'}</p>
+                          <p className="text-2xl font-black text-white mt-1.5">{val}<span className="text-xs opacity-40 ml-0.5">%</span></p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-emerald-400 font-black uppercase tracking-widest text-xs">Análise Premium EPL</h2>
-                    <p className="text-emerald-100/60 text-[10px] font-medium">Dataset 2025/26 + Histórico desde 2020</p>
+                )}
+
+                <div className="space-y-8 pt-6">
+                  <div className="flex items-center gap-4 px-2">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Fluxo de Probabilidades</span>
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                   </div>
+
+                  <ProbabilityCarousel>
+                    <ProbabilityBar
+                      icon={Trophy}
+                      label="Vencedor Diretriz"
+                      homeTeam={apiData.homeTeam}
+                      awayTeam={apiData.awayTeam}
+                      homeProbability={apiData.scenarioData[activeScenario].probabilities.winner.home}
+                      awayProbability={apiData.scenarioData[activeScenario].probabilities.winner.away}
+                      drawProbability={apiData.scenarioData[activeScenario].probabilities.winner.draw}
+                      color="winner"
+                      reasoning={apiData.metadata.winner.reasoning}
+                      source={apiData.metadata.winner.source}
+                      methodType={apiData.scenarioData[activeScenario].probabilities.winner.method}
+                    />
+
+                    {metricsForSport.map(metric => {
+                      const prob = apiData.scenarioData[activeScenario].probabilities[metric.key];
+                      const meta = apiData.metadata[metric.key];
+                      if (!prob || !meta) return null;
+
+                      return (
+                        <ProbabilityBar
+                          key={metric.key}
+                          icon={metric.icon}
+                          label={metric.label}
+                          homeTeam={apiData.homeTeam}
+                          awayTeam={apiData.awayTeam}
+                          homeProbability={prob.home}
+                          awayProbability={prob.away}
+                          color={metric.color}
+                          reasoning={meta.reasoning}
+                          source={meta.source}
+                          methodType={prob.method}
+                        />
+                      );
+                    })}
+                  </ProbabilityCarousel>
                 </div>
 
-                <div className="space-y-3">
-                  {apiData.eplAnalysis.insights.map((insight: string, idx: number) => (
-                    <div key={idx} className="flex gap-3 items-start bg-emerald-950/30 p-4 rounded-2xl border border-emerald-500/10">
-                      <div className="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                      <p className="text-emerald-50 text-sm leading-relaxed font-medium">{insight}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 grid grid-cols-3 gap-2">
-                  {Object.entries(apiData.eplAnalysis.probabilities).map(([key, val]: any) => (
-                    <div key={key} className="bg-black/20 p-3 rounded-xl border border-emerald-500/5 text-center">
-                      <p className="text-[10px] text-emerald-400/60 font-bold uppercase">{key === 'H' ? 'Casa' : key === 'A' ? 'Fora' : 'Empate'}</p>
-                      <p className="text-xl font-black text-emerald-50">{val}%</p>
-                    </div>
-                  ))}
+                <div className="pt-8">
+                   <EventTimeline events={apiData.timelineEvents} />
                 </div>
               </div>
             )}
 
-            {/* Scenario Selector */}
-            <ScenarioSelector
-              activeScenario={activeScenario}
-              onScenarioChange={setActiveScenario}
-            />
-
-            {/* Probabilities Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 px-1">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#1C1F5A]/30 to-transparent" />
-                <span className="text-xs uppercase tracking-wider text-[#1C1F5A]/75 font-medium">Probabilidades Contextuais</span>
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#1C1F5A]/30 to-transparent" />
+            {/* TAB CONTENT: H2H e História */}
+            {activeTab === 'h2h' && (
+              <div className="space-y-10 animate-in slide-in-from-bottom-4 fade-in duration-500 max-w-4xl mx-auto">
+                <MatchHistory
+                  homeTeam={apiData.matchHistory.homeTeam}
+                  awayTeam={apiData.matchHistory.awayTeam}
+                  headToHead={apiData.matchHistory.headToHead}
+                />
+                <AutoComments comments={apiData.autoComments} />
               </div>
+            )}
 
-              <ProbabilityCarousel>
-                <ProbabilityBar
-                  icon={Trophy}
-                  label="Vencedor da Partida"
+            {/* TAB CONTENT: Elencos e Tracker */}
+            {activeTab === 'squads' && (
+              <div className="space-y-10 animate-in slide-in-from-bottom-4 fade-in duration-500 max-w-4xl mx-auto">
+                <SquadDetails
+                  homeTeamName={apiData.homeTeam}
+                  awayTeamName={apiData.awayTeam}
+                  homeSquad={apiData.squads.home}
+                  awaySquad={apiData.squads.away}
+                />
+                <PlayerStats
                   homeTeam={apiData.homeTeam}
                   awayTeam={apiData.awayTeam}
-                  homeProbability={apiData.scenarioData[activeScenario].probabilities.winner.home}
-                  awayProbability={apiData.scenarioData[activeScenario].probabilities.winner.away}
-                  drawProbability={apiData.scenarioData[activeScenario].probabilities.winner.draw}
-                  color="winner"
-                  reasoning={apiData.metadata.winner.reasoning}
-                  source={apiData.metadata.winner.source}
-                  methodType={apiData.scenarioData[activeScenario].probabilities.winner.method}
+                  matchId={selectedMatchId}
                 />
-
-                {metricsForSport.map(metric => {
-                  const prob = apiData.scenarioData[activeScenario].probabilities[metric.key];
-                  const meta = apiData.metadata[metric.key];
-                  if (!prob || !meta) return null;
-
-                  return (
-                    <ProbabilityBar
-                      key={metric.key}
-                      icon={metric.icon}
-                      label={metric.label}
-                      homeTeam={apiData.homeTeam}
-                      awayTeam={apiData.awayTeam}
-                      homeProbability={prob.home}
-                      awayProbability={prob.away}
-                      color={metric.color}
-                      reasoning={meta.reasoning}
-                      source={meta.source}
-                      methodType={prob.method}
-                    />
-                  );
-                })}
-              </ProbabilityCarousel>
-            </div>
-
-            {/* Event Timeline */}
-            <EventTimeline events={apiData.timelineEvents} />
-
-            {/* Auto Comments */}
-            <AutoComments comments={apiData.autoComments} />
-
-            {/* Match History */}
-            <MatchHistory
-              homeTeam={apiData.matchHistory.homeTeam}
-              awayTeam={apiData.matchHistory.awayTeam}
-              headToHead={apiData.matchHistory.headToHead}
-            />
-
-            {/* Player Stats */}
-            <PlayerStats
-              homeTeam={apiData.homeTeam}
-              awayTeam={apiData.awayTeam}
-              matchId={selectedMatchId}
-            />
-
-            {/* Squad Details */}
-            <SquadDetails
-              homeTeamName={apiData.homeTeam}
-              awayTeamName={apiData.awayTeam}
-              homeSquad={apiData.squads.home}
-              awaySquad={apiData.squads.away}
-            />
-
-            {/* Help Section */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-[#1C1F5A]/15 p-6">
-              <h3 className="text-[#1C1F5A] mb-3 font-semibold">Como Interpretar</h3>
-              <div className="space-y-2 text-sm text-[#1C1F5A]/75">
-                <p>• Este relatório agora é puxado com jogos reais advindos do BetsAPI</p>
-                <p>• A confiança é calculada com base na consistência dos dados históricos</p>
-                <p>• Cada previsão indica de forma simples a origem e o contexto da análise</p>
-                <p>• Use o seletor de cenários para explorar como as probabilidades mudam em diferentes situações</p>
               </div>
-            </div>
-          </>
+            )}
+
+          </div>
         )}
       </div>
     </div>

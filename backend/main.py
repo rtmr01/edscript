@@ -55,11 +55,9 @@ class UpcomingMatchesQuery(BaseModel):
     def validate_search(cls, value: str | None) -> str | None:
         if value is None:
             return value
-        if not all(ch.isalnum() or ch in " -_.'" for ch in value):
+        if not all(ch.isalnum() or ch in " -_.'/&()" for ch in value):
             raise ValueError("search contém caracteres inválidos")
         return value
-
-
 class MatchScenarioQuery(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
