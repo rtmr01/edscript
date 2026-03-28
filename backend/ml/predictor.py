@@ -190,9 +190,6 @@ def predict_match(home_team, away_team, sport_key: str | None = None):
         home_model = home_raw / model_total
         draw_model = draw_raw / model_total
         away_model = away_raw / model_total
-        spread = max(home_model, draw_model, away_model) - min(home_model, draw_model, away_model)
-        if spread < 0.03:
-            model_collapsed = True
     else:
         home_model = draw_model = away_model = 0.0
 
@@ -201,7 +198,8 @@ def predict_match(home_team, away_team, sport_key: str | None = None):
         draw_final = draw_rating
         away_final = away_rating
     else:
-        blend_model = 0.70 if normalized_sport == "football" else 0.45
+        # Aumentamos o peso do modelo (que agora é treinado com um dataset melhorado)
+        blend_model = 0.85 if normalized_sport == "football" else 0.65
         blend_rating = 1.0 - blend_model
         home_final = (home_model * blend_model) + (home_rating * blend_rating)
         draw_final = (draw_model * blend_model) + (draw_rating * blend_rating)

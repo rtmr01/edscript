@@ -25,14 +25,20 @@ def generate_dataset(num_samples=5000):
         
         power_diff = home_power - away_power + 5 # Home advantage
         
-        if power_diff > 20:   home_goals = np.random.poisson(2.5); away_goals = np.random.poisson(0.5)
-        elif power_diff > 10: home_goals = np.random.poisson(1.8); away_goals = np.random.poisson(0.8)
-        elif power_diff > 0:  home_goals = np.random.poisson(1.4); away_goals = np.random.poisson(1.0)
-        elif power_diff > -10:home_goals = np.random.poisson(1.0); away_goals = np.random.poisson(1.4)
-        else:                 home_goals = np.random.poisson(0.5); away_goals = np.random.poisson(2.0)
+        # Média contínua de gols (Mandante tem leve vantagem natural)
+        base_hg = 1.35 + (power_diff * 0.035) + ((home_power - 50) * 0.015)
+        base_ag = 1.10 - (power_diff * 0.035) + ((away_power - 50) * 0.015)
+        
+        home_goals = np.random.poisson(max(0.1, base_hg))
+        away_goals = np.random.poisson(max(0.1, base_ag))
             
-        home_cards = np.random.poisson(1.5)
-        away_cards = np.random.poisson(1.8)
+        # Cartões: Mais altos em partidas disputadas (tightness)
+        tightness = 1.0 / (abs(power_diff) + 2.0)
+        base_hc = 1.6 + (tightness * 3.0) - ((home_power - 50) * 0.01)
+        base_ac = 1.9 + (tightness * 3.0) - ((away_power - 50) * 0.01)
+        
+        home_cards = np.random.poisson(max(0.5, base_hc))
+        away_cards = np.random.poisson(max(0.5, base_ac))
 
         # Variáveis históricas/sintéticas de faltas sofridas na grande área.
         home_box_touches = max(1, int(np.random.normal(8 + max(power_diff, 0) * 0.12, 2)))

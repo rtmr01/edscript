@@ -356,7 +356,7 @@ export default function App() {
                 </div>
 
                 <div className="pt-8">
-                   <EventTimeline events={apiData.timelineEvents} />
+                   <EventTimeline events={apiData.scenarioData[activeScenario].timelineEvents || []} />
                 </div>
               </div>
             )}

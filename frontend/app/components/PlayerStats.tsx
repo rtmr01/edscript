@@ -247,16 +247,18 @@ export function PlayerStats({ homeTeam, awayTeam, matchId }: PlayerStatsProps) {
               <Loader2 className="w-8 h-8 text-[#00D26A] animate-spin" />
               <p className="text-slate-500 text-sm animate-pulse">Calculando predições individuais...</p>
             </div>
-          ) : error ? (
+          ) : error && error !== "Escalação ainda não divulgada" ? (
             <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 text-center">
-              <p className="text-rose-400 text-sm font-medium">{error}</p>
-              <p className="text-slate-600 text-xs mt-2">Os jogadores do dataset precisam ser desta partida.</p>
+              <p className="text-rose-400 text-sm font-medium">Erro ao carregar tracking.</p>
+              <p className="text-slate-600 text-xs mt-2">{error}</p>
             </div>
           ) : players.length === 0 ? (
-            <div className="text-center py-16 text-slate-600">
-              <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="font-bold">Nenhum jogador encontrado</p>
-              <p className="text-xs mt-1">Estes times podem não estar no dataset de treino.</p>
+            <div className="text-center py-16 text-slate-600 bg-[#15183d]/40 rounded-2xl border border-dashed border-[#2a2e6e]">
+              <Users className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#00D26A]" />
+              <p className="font-black text-sm text-white/70 uppercase tracking-widest">Escalação Titular Pendente</p>
+              <p className="text-xs mt-2 px-4 text-white/40 max-w-sm mx-auto">
+                A AI gerará as previsões e tracking individuais assim que a súmula oficial e as escalações forem liberadas (aprox. 1h antes do apito inicial).
+              </p>
             </div>
           ) : (
             <div className="space-y-8">

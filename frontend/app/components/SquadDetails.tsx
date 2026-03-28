@@ -33,7 +33,10 @@ function SquadColumn({ title, squad }: { title: string; squad: TeamSquad }) {
             </div>
           ))
         ) : (
-          <p className="text-slate-500 text-sm">Sem jogadores disponiveis.</p>
+          <div className="flex flex-col items-center justify-center py-8 text-center bg-white/40 rounded-lg border border-slate-200 border-dashed">
+            <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider mb-1">Escalação Pendente</p>
+            <p className="text-slate-400 text-[10px]">Aguardando dados oficiais pré-jogo.</p>
+          </div>
         )}
       </div>
 

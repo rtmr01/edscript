@@ -50,18 +50,19 @@ const sports = [
         highlight: false,
     },
 ];
+
+const sportsOptions = [
+    { id: 'futebol', label: 'FUT' },
+    { id: 'basquete', label: 'BAS' },
+    { id: 'esports', label: 'ESP' },
+    { id: 'tenis', label: 'TEN' },
+];
+
 export const LandingPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSport, setSelectedSport] = useState('futebol');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navigate = useNavigate();
-
-    const sportsOptions = [
-        { id: 'futebol', label: 'FUT' },
-        { id: 'basquete', label: 'BAS' },
-        { id: 'esports', label: 'ESP' },
-        { id: 'tenis', label: 'TEN' },
-    ];
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -83,54 +84,28 @@ export const LandingPage: React.FC = () => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                 >
-                    {/* Pitch Outline */}
                     <rect x="50" y="50" width="700" height="1100" rx="4" stroke="currentColor" strokeWidth="3" />
-                    {/* Halfway Line */}
                     <line x1="50" y1="600" x2="750" y2="600" stroke="currentColor" strokeWidth="3" />
-                    {/* Center Circle */}
                     <circle cx="400" cy="600" r="90" stroke="currentColor" strokeWidth="3" />
-                    {/* Center Spot */}
                     <circle cx="400" cy="600" r="5" fill="currentColor" />
-
-                    {/* Top Penalty Area */}
                     <rect x="225" y="50" width="350" height="165" stroke="currentColor" strokeWidth="3" />
-                    {/* Top Goal Area */}
                     <rect x="300" y="50" width="200" height="55" stroke="currentColor" strokeWidth="3" />
-                    {/* Top Penalty Box Arc */}
                     <path d="M 330 215 A 90 90 0 0 0 470 215" stroke="currentColor" strokeWidth="3" />
-                    {/* Top Penalty Spot */}
                     <circle cx="400" cy="160" r="4" fill="currentColor" />
-
-                    {/* Bottom Penalty Area */}
                     <rect x="225" y="985" width="350" height="165" stroke="currentColor" strokeWidth="3" />
-                    {/* Bottom Goal Area */}
                     <rect x="300" y="1095" width="200" height="55" stroke="currentColor" strokeWidth="3" />
-                    {/* Bottom Penalty Box Arc */}
                     <path d="M 330 985 A 90 90 0 0 1 470 985" stroke="currentColor" strokeWidth="3" />
-                    {/* Bottom Penalty Spot */}
                     <circle cx="400" cy="1040" r="4" fill="currentColor" />
-
-                    {/* Tactical Elements - Player Positions & Passes */}
                     <g className="animate-pulse" style={{ animationDuration: '4s' }}>
-                        {/* Player Nodes */}
                         <circle cx="280" cy="720" r="10" fill="currentColor" fillOpacity="0.8" />
                         <circle cx="400" cy="850" r="10" fill="currentColor" fillOpacity="0.8" />
                         <circle cx="580" cy="680" r="10" fill="currentColor" fillOpacity="0.8" />
                         <circle cx="520" cy="400" r="10" fill="currentColor" fillOpacity="0.8" />
-                        
-                        {/* Passing Paths / Movement Lines */}
                         <path d="M 290 720 Q 340 780 390 840" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" />
                         <path d="M 410 850 Q 500 750 570 690" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" />
                         <path d="M 575 670 Q 550 500 525 410" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" />
-
-                        {/* Opponent Nodes (Hollow) */}
-                        <circle cx="340" cy="800" r="8" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.6"/>
-                        <circle cx="480" cy="730" r="8" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.6"/>
-                        <circle cx="500" cy="460" r="8" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.6"/>
                     </g>
                 </svg>
-
-                {/* Lighting and Vignette */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(0,210,106,0.08),transparent_40%),radial-gradient(circle_at_85%_35%,rgba(0,210,106,0.08),transparent_40%),radial-gradient(circle_at_50%_90%,rgba(28,31,90,1),transparent_70%)]" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1C1F5A]/40 to-[#1C1F5A]" />
             </div>
@@ -161,12 +136,11 @@ export const LandingPage: React.FC = () => {
                 </header>
 
                 <section className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[1.25fr_0.75fr]">
-                    {/* HERO LEFT */}
-                    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#121547]/95 to-[#0b0d30]/95 p-8 shadow-[0_20px_80px_rgba(0,0,0,0.5)] md:p-12 lg:min-h-[500px] flex flex-col justify-center backdrop-blur-sm">
-                        {/* Decorative background element inside left panel */}
+                    {/* HERO LEFT - AJUSTE: Removido overflow-hidden para não cortar o dropdown */}
+                    <div className="relative rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#121547]/95 to-[#0b0d30]/95 p-8 shadow-[0_20px_80px_rgba(0,0,0,0.5)] md:p-12 lg:min-h-[500px] flex flex-col justify-center backdrop-blur-sm">
                         <div className="absolute -left-32 -bottom-32 h-96 w-96 rounded-full bg-[#00D26A]/5 blur-[100px]" />
                         
-                        <div className="relative z-10 relative">
+                        <div className="relative z-10">
                             <div className="mb-6 animate-fade-in-down inline-flex items-center gap-2.5 rounded-full border border-[#00D26A]/30 bg-[#00D26A]/5 px-4 py-2 opacity-90 backdrop-blur-md">
                                 <span className="relative flex h-2 w-2">
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00D26A] opacity-75"></span>
@@ -186,43 +160,47 @@ export const LandingPage: React.FC = () => {
                                 Centralize partidas, Heatmaps e probabilidade de marcação usando uma interface profissional. Arquitetura desenhada para analistas e operadores de alta performance.
                             </p>
 
-                            <form onSubmit={handleSearch} className="mt-10 max-w-xl">
+                            <form onSubmit={handleSearch} className="mt-10 max-w-xl relative">
                                 <div className="group relative flex items-center rounded-2xl bg-[#0f1238] p-2 ring-1 ring-white/10 transition-all focus-within:bg-[#121547] focus-within:ring-[#00D26A]/50">
-                                    <div className="relative flex items-center h-full border-r border-white/5 mr-3 pr-3 pl-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                            className="flex items-center gap-2 rounded-lg bg-[#00D26A]/10 px-3 py-2 text-xs font-black uppercase tracking-widest text-[#00D26A] transition-colors hover:bg-[#00D26A]/20 ring-1 ring-[#00D26A]/30 focus:outline-none"
-                                        >
-                                            {sportsOptions.find(s => s.id === selectedSport)?.label}
-                                            <svg className={`w-3 h-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
-                                        </button>
+                                <div className="relative flex items-center h-full border-r border-white/5 mr-3 pr-3 pl-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                        className="flex items-center gap-2 rounded-lg bg-[#00D26A]/10 px-3 py-2 text-xs font-black uppercase tracking-widest text-[#00D26A] transition-colors hover:bg-[#00D26A]/20 ring-1 ring-[#00D26A]/30 focus:outline-none"
+                                    >
+                                        {sportsOptions.find(s => s.id === selectedSport)?.label}
+                                        <svg className={`w-3 h-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
 
-                                        {isDropdownOpen && (
-                                            <>
-                                                <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-                                                <div className="absolute top-[120%] left-0 w-32 rounded-[1rem] bg-[#141745]/95 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-50 p-1.5 flex flex-col gap-1">
-                                                    {sportsOptions.map(sport => (
-                                                        <button
-                                                            key={sport.id}
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setSelectedSport(sport.id);
-                                                                setIsDropdownOpen(false);
-                                                            }}
-                                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-[0.2em] transition-all duration-200 ${
-                                                                selectedSport === sport.id 
-                                                                    ? 'bg-[#00D26A] text-[#1C1F5A] shadow-[0_0_15px_rgba(0,210,106,0.3)]' 
-                                                                    : 'text-white/50 hover:bg-white/5 hover:text-white'
-                                                            }`}
-                                                        >
-                                                            {sport.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                    {isDropdownOpen && (
+                                        <>
+                                            <div 
+                                                className="fixed inset-0 z-[90]" 
+                                                onClick={() => setIsDropdownOpen(false)} 
+                                            />
+                                            
+                                            <div className="absolute top-[calc(100%+12px)] left-0 min-w-[120px] rounded-xl bg-[#141745] border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden z-[100] p-1.5 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-200">
+                                                {sportsOptions.map(option => (
+                                                    <button
+                                                        key={option.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedSport(option.id);
+                                                            setIsDropdownOpen(false);
+                                                        }}
+                                                        className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-[0.2em] transition-all duration-200 ${
+                                                            selectedSport === option.id 
+                                                                ? 'bg-[#00D26A] text-[#1C1F5A]' 
+                                                                : 'text-white/50 hover:bg-white/5 hover:text-white'
+                                                        }`}
+                                                    >
+                                                        {option.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
 
                                     <div className="text-white/40 group-focus-within:text-[#00D26A] transition-colors mr-2">
                                         <Search className="h-5 w-5" />
@@ -244,7 +222,6 @@ export const LandingPage: React.FC = () => {
                                 </div>
                             </form>
 
-                            {/* Small Quick-Stats below search */}
                             <div className="mt-8 flex items-center gap-5 text-sm font-medium text-white/50">
                                 <div className="flex items-center gap-2">
                                     <Focus className="h-4 w-4 text-[#00D26A]/70" />
@@ -273,7 +250,6 @@ export const LandingPage: React.FC = () => {
                         </div>
 
                         <div className="flex-1 space-y-4">
-                            {/* Stat Card 1 */}
                             <div className="group rounded-2xl border border-white/5 bg-white/5 p-5 transition-colors hover:bg-white/10">
                                 <div className="mb-3 flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-[#00D26A]">
@@ -287,7 +263,6 @@ export const LandingPage: React.FC = () => {
                                 </p>
                             </div>
 
-                            {/* Stat Card 2 - Bar chart viz */}
                             <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-[#121547] to-[#0f1238] p-5">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-2 text-white/80">
@@ -325,7 +300,6 @@ export const LandingPage: React.FC = () => {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {sports.map((sport) => {
                             const Icon = sport.icon;
-                            // Make the highlighted card (Futebol) pop more
                             const isHighlighted = sport.highlight;
 
                             return (
@@ -386,4 +360,4 @@ export const LandingPage: React.FC = () => {
             </div>
         </div>
     );
-};
+};
